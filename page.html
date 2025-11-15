@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O Cofre e os Guardiões</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2d1b4e;
+            --secondary: #8b5cf6;
+            --accent: #fbbf24;
+            --gold: #d4af37;
+            --bg-dark: #0f0a1a;
+            --text-light: #f8fafc;
+            --text-muted: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, var(--primary) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            perspective: 1000px;
+            overflow-x: hidden;
+        }
+
+        /* Animações 3D */
+        @keyframes floatIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) rotateX(45deg);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) rotateX(0);
+            }
+        }
+
+        @keyframes pulse3d {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes rotate3d {
+            from { transform: rotateY(0deg) rotateX(5deg); }
+            to { transform: rotateY(360deg) rotateX(5deg); }
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px rgba(251, 191, 36, 0.5), 0 0 40px rgba(139, 92, 246, 0.3); }
+            50% { text-shadow: 0 0 30px rgba(251, 191, 36, 0.8), 0 0 60px rgba(139, 92, 246, 0.6); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Container principal */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Tela inicial */
+        .screen {
+            display: none;
+            animation: floatIn 0.8s ease-out;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+        }
+
+        /* Intro Screen */
+        .intro-screen {
+            text-align: center;
+        }
+
+        .title {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            animation: glow 3s ease-in-out infinite;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: linear-gradient(45deg, var(--accent), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+
+        .description {
+            max-width: 600px;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 40px;
+            text-align: justify;
+        }
+
+        /* 3D Safe */
+        .safe-3d {
+            perspective: 1000px;
+            width: 200px;
+            height: 200px;
+            margin: 40px auto;
+        }
+
+        .safe-box {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate3d 8s infinite linear;
+        }
+
+        .safe-face {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--gold) 0%, #c9a227 100%);
+            border: 3px solid var(--gold);
+            font-size: 4rem;
+        }
+
+        .safe-front {
+            transform: translateZ(100px);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.6);
+        }
+
+        .safe-back {
+            transform: rotateY(180deg) translateZ(100px);
+        }
+
+        .safe-right {
+            transform: rotateY(90deg) translateZ(100px);
+        }
+
+        .safe-left {
+            transform: rotateY(-90deg) translateZ(100px);
+        }
+
+        .safe-top {
+            transform: rotateX(90deg) translateZ(100px);
+        }
+
+        .safe-bottom {
+            transform: rotateX(-90deg) translateZ(100px);
+        }
+
+        /* Botões */
+        button {
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--accent) 100%);
+            color: var(--bg-dark);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 35px rgba(251, 191, 36, 0.6);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--accent);
+            border: 2px solid var(--accent);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent);
+            color: var(--bg-dark);
+            transform: scale(1.05);
+        }
+
+        /* Game Screen */
+        .game-screen {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+
+        .questions-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+        }
+
+        .counter {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+
+        /* Guardians */
+        .guardians-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .guardian {
+            perspective: 1000px;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(45, 27, 78, 0.8) 0%, rgba(139, 92, 246, 0.2) 100%);
+            border: 2px solid var(--secondary);
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            animation: slideIn 0.6s ease-out backwards;
+        }
+
+        .guardian:nth-child(1) { animation-delay: 0.1s; }
+        .guardian:nth-child(2) { animation-delay: 0.2s; }
+        .guardian:nth-child(3) { animation-delay: 0.3s; }
+
+        .guardian:hover {
+            transform: translateY(-10px) scale(1.05);
+            border-color: var(--accent);
+            box-shadow: 0 15px 40px rgba(251, 191, 36, 0.3);
+        }
+
+        .guardian-avatar {
+            font-size: 5rem;
+            margin-bottom: 15px;
+            animation: pulse3d 2s ease-in-out infinite;
+        }
+
+        .guardian-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--accent);
+        }
+
+        .guardian-role {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
+
+        .ask-button {
+            width: 100%;
+            padding: 12px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .ask-button:hover {
+            background: var(--accent);
+            transform: scale(1.02);
+        }
+
+        .ask-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Dialog Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 500px;
+            text-align: center;
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 50px rgba(251, 191, 36, 0.3);
+            animation: floatIn 0.5s ease-out;
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+        }
+
+        .questions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .question-btn {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--secondary);
+            color: var(--text-light);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .question-btn:hover {
+            background: rgba(251, 191, 36, 0.2);
+            border-color: var(--accent);
+            transform: translateX(10px);
+        }
+
+        .close-modal {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--secondary);
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        /* Response Screen */
+        .response-screen {
+            text-align: center;
+        }
+
+        .response-card {
+            background: linear-gradient(135deg, rgba(45, 27, 78, 0.9) 0%, rgba(139, 92, 246, 0.3) 100%);
+            border: 2px solid var(--accent);
+            padding: 40px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 40px rgba(251, 191, 36, 0.2);
+        }
+
+        .response-guardian {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .response-question {
+            font-size: 1.3rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .response-answer {
+            font-size: 1.5rem;
+            color: var(--text-light);
+            margin-bottom: 20px;
+            font-style: italic;
+            line-height: 1.8;
+        }
+
+        /* End Screen */
+        .end-screen {
+            text-align: center;
+        }
+
+        .result-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .victory {
+            color: var(--accent);
+        }
+
+        .defeat {
+            color: #ef4444;
+        }
+
+        .result-message {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+
+        .chest-result {
+            font-size: 6rem;
+            margin: 40px 0;
+            animation: pulse3d 1s ease-in-out infinite;
+        }
+
+        .stats {
+            background: rgba(139, 92, 246, 0.2);
+            border: 2px solid var(--secondary);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 1.1rem;
+        }
+
+        /* Chests Selection */
+        .chests-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .chest {
+            perspective: 1000px;
+            cursor: pointer;
+            animation: slideIn 0.6s ease-out backwards;
+        }
+
+        .chest:nth-child(1) { animation-delay: 0.1s; }
+        .chest:nth-child(2) { animation-delay: 0.2s; }
+        .chest:nth-child(3) { animation-delay: 0.3s; }
+
+        .chest-box {
+            width: 150px;
+            height: 200px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+
+        .chest:hover .chest-box {
+            transform: rotateY(15deg) rotateX(5deg);
+        }
+
+        .chest-front {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--gold) 100%);
+            border: 3px solid var(--gold);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4), inset -2px -2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .chest-label {
+            position: absolute;
+            bottom: -40px;
+            left: 0;
+            right: 0;
+            font-weight: bold;
+            text-align: center;
+            color: var(--accent);
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5rem;
+            }
+
+            .guardians-container {
+                grid-template-columns: 1fr;
+            }
+
+            .safe-box {
+                width: 150px;
+                height: 150px;
+            }
+
+            .safe-face {
+                width: 150px;
+                height: 150px;
+                font-size: 3rem;
+            }
+
+            .safe-front, .safe-back, .safe-right, 
+            .safe-left, .safe-top, .safe-bottom {
+                width: 150px;
+                height: 150px;
+            }
+
+            .safe-front {
+                transform: translateZ(75px);
+            }
+
+            .safe-back {
+                transform: rotateY(180deg) translateZ(75px);
+            }
+
+            .safe-right {
+                transform: rotateY(90deg) translateZ(75px);
+            }
+
+            .safe-left {
+                transform: rotateY(-90deg) translateZ(75px);
+            }
+
+            .safe-top {
+                transform: rotateX(90deg) translateZ(75px);
+            }
+
+            .safe-bottom {
+                transform: rotateX(-90deg) translateZ(75px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Tela Inicial -->
+        <div id="introScreen" class="screen active intro-screen">
+            <h1 class="title">O Cofre e os Guardiões</h1>
+            <p class="subtitle">Um Jogo de Lógica e Dedução</p>
+            
+            <div class="safe-3d">
+                <div class="safe-box">
+                    <div class="safe-face safe-front">🔒</div>
+                    <div class="safe-face safe-back">🔒</div>
+                    <div class="safe-face safe-right">🔒</div>
+                    <div class="safe-face safe-left">🔒</div>
+                    <div class="safe-face safe-top">🔒</div>
+                    <div class="safe-face safe-bottom">🔒</div>
+                </div>
+            </div>
+
+            <p class="description">
+                Você encontrou um cofre com um tesouro escondido. Três guardiões estão de guarda. 
+                Um sempre diz a verdade, um sempre mente, e o terceiro responde aleatoriamente. 
+                Você tem apenas 3 perguntas para descobrir qual cofre contém o tesouro. 
+                Use sua lógica e dedução para vencer!
+            </p>
+
+            <button class="btn-primary" onclick="startGame()">Começar Jogo</button>
+        </div>
+
+        <!-- Tela de Seleção de Guardiões -->
+        <div id="guardianScreen" class="screen game-screen">
+            <div class="header">
+                <h2>Escolha um Guardião</h2>
+                <div class="questions-info">
+                    <div class="info-item">
+                        <span>Perguntas Restantes:</span>
+                        <span class="counter" id="questionsCounter">3</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Acertos:</span>
+                        <span class="counter" id="correctCounter">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guardians-container" id="guardiansContainer"></div>
+        </div>
+
+        <!-- Tela de Resposta -->
+        <div id="responseScreen" class="screen response-screen">
+            <div class="response-card">
+                <div class="response-guardian" id="responseGuardian">🤷</div>
+                <div class="response-question" id="responseQuestion"></div>
+                <div class="response-answer" id="responseAnswer"></div>
+            </div>
+            <button class="btn-primary" onclick="nextQuestion()">Próxima Pergunta</button>
+        </div>
+
+        <!-- Tela Final -->
+        <div id="endScreen" class="screen end-screen">
+            <h2 id="resultTitle" class="result-title"></h2>
+            <p class="result-message" id="resultMessage"></p>
+            <div class="chest-result" id="chestResult"></div>
+            <div class="stats" id="statsContainer"></div>
+            <button class="btn-primary" onclick="location.reload()">Jogar Novamente</button>
+        </div>
+
+        <!-- Tela de Seleção de Cofres -->
+        <div id="chestScreen" class="screen game-screen">
+            <div class="header">
+                <h2>Escolha o Cofre com o Tesouro</h2>
+            </div>
+            <div class="chests-container" id="chestsContainer"></div>
+        </div>
+    </div>
+
+    <!-- Modal de Perguntas -->
+    <div id="questionsModal" class="modal">
+        <div class="modal-content">
+            <h3 class="modal-title">Escolha uma Pergunta</h3>
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+            <div class="questions-list" id="questionsList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Estado do Jogo
+        const gameState = {
+            guardians: [
+                { name: 'Verdade', role: 'Sempre diz a verdade', emoji: '✨', type: 'truth' },
+                { name: 'Engano', role: 'Sempre mente', emoji: '🌙', type: 'liar' },
+                { name: 'Acaso', role: 'Responde aleatoriamente', emoji: '🎲', type: 'random' }
+            ],
+            treasureChest: null,
+            questionsAsked: [],
+            questionsRemaining: 3,
+            currentGuardian: null,
+            responses: [],
+            deductions: {
+                truth: null,
+                liar: null,
+                random: null
+            },
+            correct: 0
+        };
+
+        const questions = [
+            { text: 'Qual destes cofres contém o tesouro?', answers: { truth: 'Cofre A', liar: 'Cofre B ou C', random: 'Aleatório' } },
+            { text: 'Se eu perguntasse a outro guardião qual cofre tem o tesouro, qual ele apontaria?', answers: { truth: 'O verdadeiro', liar: 'O falso', random: 'Aleatório' } },
+            { text: 'Você é o guardião que sempre diz a verdade?', answers: { truth: 'Sim', liar: 'Sim', random: 'Aleatório' } },
+            { text: 'Os outros guardiões concordam que você diz a verdade?', answers: { truth: 'Sim', liar: 'Não', random: 'Aleatório' } },
+            { text: 'Este cofre contém o tesouro?', answers: { truth: 'Depende do cofre', liar: 'Depende do cofre', random: 'Aleatório' } }
+        ];
+
+        // Inicializar o jogo
+        function startGame() {
+            gameState.treasureChest = Math.floor(Math.random() * 3);
+            gameState.guardians = gameState.guardians.sort(() => Math.random() - 0.5);
+            showScreen('guardianScreen');
+            renderGuardians();
+        }
+
+        // Renderizar guardiões
+        function renderGuardians() {
+            const container = document.getElementById('guardiansContainer');
+            container.innerHTML = gameState.guardians.map((guardian, index) => `
+                <div class="guardian">
+                    <div class="guardian-avatar">${guardian.emoji}</div>
+                    <div class="guardian-name">${guardian.name}</div>
+                    <div class="guardian-role">${guardian.role}</div>
+                    <button class="ask-button" onclick="selectGuardian(${index})" ${gameState.questionsRemaining === 0 ? 'disabled' : ''}>
+                        Fazer Pergunta
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Selecionar Guardião
+        function selectGuardian(index) {
+            if (gameState.questionsRemaining <= 0) {
+                showChestScreen();
+                return;
+            }
+            gameState.currentGuardian = index;
+            showQuestionsModal();
+        }
+
+        // Modal de Perguntas
+        function showQuestionsModal() {
+            const modal = document.getElementById('questionsModal');
+            const questionsList = document.getElementById('questionsList');
+            
+            questionsList.innerHTML = questions.map((q, i) => `
+                <button class="question-btn" onclick="askQuestion(${i})">
+                    ${q.text}
+                </button>
+            `).join('');
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('questionsModal').classList.remove('active');
+        }
+
+        // Fazer Pergunta
+        function askQuestion(questionIndex) {
+            closeModal();
+            const guardian = gameState.guardians[gameState.currentGuardian];
+            const question = questions[questionIndex];
+            
+            gameState.questionsAsked.push(question);
+            gameState.questionsRemaining--;
+
+            // Simular resposta baseada no tipo de guardião
+            let answer = '';
+            if (guardian.type === 'truth') {
+                answer = `${question.text.substring(0, 30)}... Cofre ${String.fromCharCode(65 + gameState.treasureChest)}.`;
+            } else if (guardian.type === 'liar') {
+                const falseChest = (gameState.treasureChest + Math.floor(Math.random() * 2) + 1) % 3;
+                answer = `${question.text.substring(0, 30)}... Cofre ${String.fromCharCode(65 + falseChest)}.`;
+            } else {
+                const randomChest = Math.floor(Math.random() * 3);
+                answer = `${question.text.substring(0, 30)}... Cofre ${String.fromCharCode(65 + randomChest)}.`;
+            }
+
+            gameState.responses.push({
+                guardian: guardian.name,
+                question: question.text,
+                answer: answer
+            });
+
+            showResponse(guardian, question, answer);
+        }
+
+        // Mostrar Resposta
+        function showResponse(guardian, question, answer) {
+            document.getElementById('responseGuardian').textContent = guardian.emoji;
+            document.getElementById('responseQuestion').textContent = question.text;
+            document.getElementById('responseAnswer').textContent = answer;
+            showScreen('responseScreen');
+        }
+
+        // Próxima Pergunta
+        function nextQuestion() {
+            document.getElementById('questionsCounter').textContent = gameState.questionsRemaining;
+            
+            if (gameState.questionsRemaining === 0) {
+                showChestScreen();
+            } else {
+                showScreen('guardianScreen');
+                renderGuardians();
+            }
+        }
+
+        // Mostrar tela de seleção de cofres
+        function showChestScreen() {
+            const container = document.getElementById('chestsContainer');
+            container.innerHTML = [0, 1, 2].map(i => `
+                <div class="chest" onclick="selectChest(${i})">
+                    <div class="chest-box">
+                        <div class="chest-front">💎</div>
+                    </div>
+                    <div class="chest-label">Cofre ${String.fromCharCode(65 + i)}</div>
+                </div>
+            `).join('');
+            showScreen('chestScreen');
+        }
+
+        // Selecionar Cofre
+        function selectChest(index) {
+            const isCorrect = index === gameState.treasureChest;
+            
+            if (isCorrect) {
+                gameState.correct++;
+                showVictory();
+            } else {
+                showDefeat();
+            }
+        }
+
+        // Vitória
+        function showVictory() {
+            const title = document.getElementById('resultTitle');
+            const message = document.getElementById('resultMessage');
+            const chest = document.getElementById('chestResult');
+            
+            title.textContent = '🎉 Parabéns! 🎉';
+            title.classList.add('victory');
+            title.classList.remove('defeat');
+            message.textContent = `Você descobriu o tesouro! Sua dedução foi perfeita.`;
+            chest.textContent = '💎';
+            
+            updateStats();
+            showScreen('endScreen');
+        }
+
+        // Derrota
+        function showDefeat() {
+            const title = document.getElementById('resultTitle');
+            const message = document.getElementById('resultMessage');
+            const chest = document.getElementById('chestResult');
+            
+            title.textContent = '😔 Fim de Jogo';
+            title.classList.add('defeat');
+            title.classList.remove('victory');
+            message.textContent = `O tesouro estava no Cofre ${String.fromCharCode(65 + gameState.treasureChest)}. Tente novamente!`;
+            chest.textContent = '🔒';
+            
+            updateStats();
+            showScreen('endScreen');
+        }
+
+        // Atualizar Estatísticas
+        function updateStats() {
+            const stats = document.getElementById('statsContainer');
+            stats.innerHTML = `
+                <div class="stat-item">
+                    <span>Perguntas Usadas:</span>
+                    <strong>${3 - gameState.questionsRemaining}</strong>
+                </div>
+                <div class="stat-item">
+                    <span>Respostas Analisadas:</span>
+                    <strong>${gameState.responses.length}</strong>
+                </div>
+                <div class="stat-item">
+                    <span>Resultado:</span>
+                    <strong>${gameState.correct > 0 ? 'Vitória!' : 'Derrota'}</strong>
+                </div>
+            `;
+        }
+
+        // Alternar Telas
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+    </script>
+</body>
+</html>
